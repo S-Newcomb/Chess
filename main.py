@@ -14,7 +14,7 @@ class Board:
                 if (row == 0 and col == 1):
                     occ = Rook(pos,"White")
                 elif (row == 6 or row == 7):
-                    occ = Rook(pos,"Black")
+                    occ = Pawn(pos,"Black")
                 else: 
                     occ = None                    
 
@@ -69,10 +69,6 @@ class Piece:
     position = [int, int]
     color = str
 
-    def __init__(self, pos, col):
-        self.position = pos
-        self.color = col
-
     def inCheck(self):
         pass
 
@@ -125,10 +121,16 @@ class Piece:
 
 
 class Pawn(Piece):
-    pass
+    def __init__(self, pos, col):
+        self.position = pos
+        self.color = col   
+        self.name = "Pawn"
 
 class Rook(Piece):
-    Piece.name = "Rook"
+    def __init__(self, pos, col):
+        self.position = pos
+        self.color = col
+        self.name = "Rook"
 
     def getValidMoves(self):
         validMoves = []
@@ -138,19 +140,29 @@ class Rook(Piece):
         validMoves.extend(super().isLineValid(board, 0, -1, 0)) #Down
         return validMoves
 
-
-
 class Knight(Piece):
-    pass
+    def __init__(self, pos, col):
+        self.position = pos
+        self.color = col
+        self.name = "Knight"
 
 class Bishop(Piece):
-    pass
+    def __init__(self, pos, col):
+        self.position = pos
+        self.color = col
+        self.name = "Bishop"
 
 class Queen(Piece):
-    pass
+    def __init__(self, pos, col):
+        self.position = pos
+        self.color = col
+        self.name = "Queen"
 
 class King(Piece):
-    pass
+    def __init__(self, pos, col):
+        self.position = pos
+        self.color = col
+        self.name = "King"
 
 def drawBoard(board):
     for s in range(64):
@@ -170,7 +182,7 @@ def drawBoard(board):
 board = Board()
 board.populateSquares()
 drawBoard(board)
+print("")
 testPiece = board.getPieceAtPos([0,1])
-testPiece.move(board, board.getSquareAtPos([5,1]))
-print(testPiece.position)
+testPiece.move(board, board.getSquareAtPos([6,1]))
 drawBoard(board)
