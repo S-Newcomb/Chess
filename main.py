@@ -6,26 +6,26 @@ class Board:
 
     def populateSquares(self):
        # print("here")
-        for row in range(8):
-            for col in range(8):
-                number = row * 8 + col
-                pos = [row, col]
+        for x in range(8):
+            for y in range(8):
+                number = x * 8 + y
+                pos = [x, y]
 
-                if (row == 0 and col == 1):
+                if (x == 0 and y == 1):
                     occ = Rook(pos,"White")
-                elif (row == 6 or row == 7):
+                elif (y == 6 or y == 7):
                     occ = Pawn(pos,"Black")
                 else: 
                     occ = None                    
 
                 #Even rows have black - white pattern
-                if (row % 2 ==  0):
-                    if (col % 2 == 0):
+                if (x % 2 ==  0):
+                    if (y % 2 == 0):
                         color = "Black"
                     else: color = "White"
                 #Odd rows have white - black pattern
                 else: 
-                    if (col % 2 == 0):
+                    if (y % 2 == 0):
                         color = "White"
                     else: color = "Black"
                 
@@ -85,13 +85,17 @@ class Piece:
         if (piece != None and piece.color == self.color):
             return False
         
+        #Pawns cannot attack up
+        if (piece != None and self.name == "Pawn" and piece.position[0] == self.position[0]):
+            return False
+        
         return True
         
     """ Checks whether every square in a line determined by change in x and y is valid """
     def isLineValid(self, board, changeInX, changeInY, range):
         if (range == 0): range = 7
         validSquares = []
-        newPos = self.position
+        newPos = self.position.copy()
         newPos[0] += changeInX
         newPos[1] += changeInY
         count = 0
@@ -105,7 +109,10 @@ class Piece:
     #Should be implemented in all subclasses, is this necessary?
     def getValidMoves(self):
         pass
-    
+
+    """Lots to do here:
+        - Handle taken pieces """
+
     def move(self, board, square):
         if (self == None):
             print("You can't move nothing!")
@@ -118,13 +125,26 @@ class Piece:
             self.position = square.position
             #Mark that square is occupied by this piece
             square.occupied = self
+        else: 
+            print("Not a valid move")
 
-
+#TODO: Allow Pawns to move 2 spaces on first move, check position pawn is moving from
 class Pawn(Piece):
     def __init__(self, pos, col):
         self.position = pos
         self.color = col   
         self.name = "Pawn"
+
+    def getValidMoves(self):
+        validMoves = []
+        if (self.color == "White"):
+            up = 1
+        else:
+            up = -1
+        validMoves.extend(super().isLineValid(board, 0, up, 1))  #Up depends on color
+        validMoves.extend(super().isLineValid(board, 1, up, 1))  #Right Diagonal
+        validMoves.extend(super().isLineValid(board, -1, up, 1)) #Left Diagonal
+        return validMoves
 
 class Rook(Piece):
     def __init__(self, pos, col):
@@ -165,24 +185,26 @@ class King(Piece):
         self.name = "King"
 
 def drawBoard(board):
-    for s in range(64):
-        square = board.squares[s]
-        if (square.position[1] == 7):
-            if (square.occupied == None):
-                print(square.color[0] + ' ')
-            else:
-                print(square.occupied.name + ' ')
-        else:
+    for y in range(8):
+        print("")
+        for x in range(8):
+            invrow = 7-y
+            square = board.getSquareAtPos([x, invrow])
             if (square.occupied == None):
                 print(square.color[0] + ' ', end = "")
             else:
                 print(square.occupied.name + ' ', end = "")
+    print("")
+
 
 
 board = Board()
 board.populateSquares()
 drawBoard(board)
-print("")
-testPiece = board.getPieceAtPos([0,1])
-testPiece.move(board, board.getSquareAtPos([6,1]))
+testRook = board.getPieceAtPos([0,1])
+testRook.move(board, board.getSquareAtPos([0,6]))
 drawBoard(board)
+testPawn = board.getPieceAtPos([1, 7])
+testPawn.move(board, board.getSquareAtPos([0,6]))
+drawBoard(board)
+
