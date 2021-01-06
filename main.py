@@ -88,6 +88,10 @@ class Piece:
         #Pawns cannot attack up
         if (piece != None and self.name == "Pawn" and piece.position[0] == self.position[0]):
             return False
+        #Pawns cannot move diagonally unless capturing
+        if (piece == None and self.name == "Pawn" and 
+        (square.position[0] == self.position[0] + 1 or square.position[0] == self.position[0] - 1)):
+            return False
         
         return True
         
@@ -137,11 +141,17 @@ class Pawn(Piece):
 
     def getValidMoves(self):
         validMoves = []
+        #Up or forward depends on color
         if (self.color == "White"):
             up = 1
         else:
             up = -1
-        validMoves.extend(super().isLineValid(board, 0, up, 1))  #Up depends on color
+        #If the pawn has not moved
+        if ((self.color == "White" and self.position[1] == 1) or
+            (self.color == "Black" and self.position[1] == 6)):
+            validMoves.extend(super().isLineValid(board, 0, up, 2))  #Can move up 2 
+        else:
+            validMoves.extend(super().isLineValid(board, 0, up, 1))  #Up
         validMoves.extend(super().isLineValid(board, 1, up, 1))  #Right Diagonal
         validMoves.extend(super().isLineValid(board, -1, up, 1)) #Left Diagonal
         return validMoves
@@ -207,4 +217,6 @@ drawBoard(board)
 testPawn = board.getPieceAtPos([1, 7])
 testPawn.move(board, board.getSquareAtPos([0,6]))
 drawBoard(board)
-
+testPawn2 = board.getPieceAtPos([1, 6])
+testPawn2.move(board, board.getSquareAtPos([1,4]))
+drawBoard(board)
