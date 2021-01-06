@@ -74,16 +74,6 @@ class Square:
             self.occupied = occ
             self.color = color
 
-class Row:
-    A = 1
-    B = 2
-    C = 3
-    D = 4
-    E = 5
-    F = 6
-    G = 7
-    H = 8
-
 class Piece:
     name = str
     position = [int, int]
@@ -273,18 +263,51 @@ def drawBoard(board):
                 print("|" + square.occupied.name[0:4] + ' |', end = "")
     print("")
 
+def alphaNumMoveToPos(text):
+    letter = text[0].capitalize()
+    number = text[1]
+    #convert letters to x 
+    if (letter == "A"):
+        letter = 0
+    elif (letter == "B"):
+        letter = 1
+    elif (letter == "C"):
+        letter = 2
+    elif (letter == "D"):
+        letter = 3
+    elif (letter == "E"):
+        letter = 4
+    elif (letter == "F"):
+        letter = 5
+    elif (letter == "G"):
+        letter = 6
+    elif (letter == "H"):
+        letter = 7
+    else:
+        print("Letter: " + letter + " is not valid")
+        return
+    #convert numbers from 1-8 to 0-7
+    number = int(number) - 1
+    if (number > 7 or number < 0):
+        print("Number: " + number + " is not valid")
+        return
+    return [letter, number]
+
+def parseMove(text, board):
+    trimText = text.strip()
+    piecePos = alphaNumMoveToPos(trimText[0:2])
+    targetSquare = alphaNumMoveToPos(trimText[3:])
+    board.getPieceAtPos(piecePos).move(board, board.getSquareAtPos(targetSquare))
+
+
 def startGame():
     board = Board()
     board.populateSquares()
     drawBoard(board)
-    testKnight= board.getPieceAtPos([1, 7])
-    testKnight.move(board, board.getSquareAtPos([2,5]))
-    drawBoard(board)
-    testKnight.move(board, board.getSquareAtPos([1,3]))
-    drawBoard(board)
-    testKnight.move(board, board.getSquareAtPos([2,1]))
-    drawBoard(board)
-    testKnight.move(board, board.getSquareAtPos([4,2]))
-    drawBoard(board)
+    gameOver = False
+    while not gameOver:
+        move = input("Type your move:")
+        parseMove(move, board)
+        drawBoard(board)
 
 startGame()
