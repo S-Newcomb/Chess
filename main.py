@@ -234,6 +234,18 @@ class King(Piece):
         self.color = col
         self.name = "King"
 
+    def getValidMoves(self):
+        validMoves = []
+        validMoves.extend(super().isLineValid(board, 1, 0, 1))  #Right
+        validMoves.extend(super().isLineValid(board, -1, 0, 1)) #Left
+        validMoves.extend(super().isLineValid(board, 0, 1, 1))  #Up
+        validMoves.extend(super().isLineValid(board, 0, -1, 1)) #Down
+        validMoves.extend(super().isLineValid(board, 1, 1, 1))  #Right Forward Diag
+        validMoves.extend(super().isLineValid(board, -1, 1, 1)) #Left Forward Diag
+        validMoves.extend(super().isLineValid(board, 1, -1, 1)) #Right Back Diag
+        validMoves.extend(super().isLineValid(board, -1, -1, 1)) #Left Back Diag
+        return validMoves
+
 def drawBoard(board):
     for y in range(8):
         print("")
@@ -259,6 +271,17 @@ testQueen.move(board, board.getSquareAtPos([3,5]))
 drawBoard(board)
 testQueen.move(board, board.getSquareAtPos([7,1]))
 drawBoard(board)
+testKing = board.getPieceAtPos([4, 7])
+testKing.move(board, board.getSquareAtPos([3,7]))
+drawBoard(board)
+testKing.move(board, board.getSquareAtPos([3,6]))
+drawBoard(board)
+testKing.move(board, board.getSquareAtPos([2,5]))
+drawBoard(board)
+
+
+
+
 
 
 
