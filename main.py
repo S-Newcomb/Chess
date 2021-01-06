@@ -130,18 +130,13 @@ class Piece:
             count += 1
         return validSquares
 
-    #Should be implemented in all subclasses, is this necessary?
-    # def getValidMoves(self):
-    #     pass
-
     """Lots to do here:
         - Handle taken pieces """
-
     def move(self, board, square):
         if (self == None):
             print("You can't move nothing!")
             return
-        validMoves = self.getValidMoves()
+        validMoves = self.getValidMoves(board)
         if square in validMoves:
             #Remove Piece from current square
             board.getSquareAtPos(self.position).occupied = None
@@ -158,7 +153,7 @@ class Pawn(Piece):
         self.color = col   
         self.name = "Pawn"
 
-    def getValidMoves(self):
+    def getValidMoves(self, board):
         validMoves = []
         #Up or forward depends on color
         if (self.color == "White"):
@@ -181,7 +176,7 @@ class Rook(Piece):
         self.color = col
         self.name = "Rook"
 
-    def getValidMoves(self):
+    def getValidMoves(self, board):
         validMoves = []
         validMoves.extend(super().isLineValid(board, 1, 0, 0))  #Right
         validMoves.extend(super().isLineValid(board, -1, 0, 0)) #Left
@@ -195,7 +190,7 @@ class Knight(Piece):
         self.color = col
         self.name = "Knight"
         
-    def getValidMoves(self):
+    def getValidMoves(self, board):
         pos = self.position.copy()
         xPos = pos[0]
         yPos = pos[1]
@@ -222,7 +217,7 @@ class Bishop(Piece):
         self.color = col
         self.name = "Bishop"
 
-    def getValidMoves(self):
+    def getValidMoves(self, board):
         validMoves = []
         validMoves.extend(super().isLineValid(board, 1, 1, 0))  #Right Forward Diag
         validMoves.extend(super().isLineValid(board, -1, 1, 0)) #Left Forward Diag
@@ -236,7 +231,7 @@ class Queen(Piece):
         self.color = col
         self.name = "Queen"
 
-    def getValidMoves(self):
+    def getValidMoves(self, board):
         validMoves = []
         validMoves.extend(super().isLineValid(board, 1, 0, 0))  #Right
         validMoves.extend(super().isLineValid(board, -1, 0, 0)) #Left
@@ -254,7 +249,7 @@ class King(Piece):
         self.color = col
         self.name = "King"
 
-    def getValidMoves(self):
+    def getValidMoves(self, board):
         validMoves = []
         validMoves.extend(super().isLineValid(board, 1, 0, 1))  #Right
         validMoves.extend(super().isLineValid(board, -1, 0, 1)) #Left
@@ -278,33 +273,18 @@ def drawBoard(board):
                 print("|" + square.occupied.name[0:4] + ' |', end = "")
     print("")
 
+def startGame():
+    board = Board()
+    board.populateSquares()
+    drawBoard(board)
+    testKnight= board.getPieceAtPos([1, 7])
+    testKnight.move(board, board.getSquareAtPos([2,5]))
+    drawBoard(board)
+    testKnight.move(board, board.getSquareAtPos([1,3]))
+    drawBoard(board)
+    testKnight.move(board, board.getSquareAtPos([2,1]))
+    drawBoard(board)
+    testKnight.move(board, board.getSquareAtPos([4,2]))
+    drawBoard(board)
 
-
-board = Board()
-board.populateSquares()
-drawBoard(board)
-testKnight= board.getPieceAtPos([1, 7])
-testKnight.move(board, board.getSquareAtPos([2,5]))
-drawBoard(board)
-testKnight.move(board, board.getSquareAtPos([1,3]))
-drawBoard(board)
-testKnight.move(board, board.getSquareAtPos([2,1]))
-drawBoard(board)
-testKnight.move(board, board.getSquareAtPos([4,2]))
-drawBoard(board)
-
-
-
-
-
-
-
-
-# testRook = board.getPieceAtPos([0,1])
-# testRook.move(board, board.getSquareAtPos([0,6]))
-# drawBoard(board)
-
-# drawBoard(board)
-# testPawn2 = board.getPieceAtPos([1, 6])
-# testPawn2.move(board, board.getSquareAtPos([1,4]))
-# drawBoard(board)
+startGame()
