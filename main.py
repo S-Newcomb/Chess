@@ -131,8 +131,8 @@ class Piece:
         return validSquares
 
     #Should be implemented in all subclasses, is this necessary?
-    def getValidMoves(self):
-        pass
+    # def getValidMoves(self):
+    #     pass
 
     """Lots to do here:
         - Handle taken pieces """
@@ -152,7 +152,6 @@ class Piece:
         else: 
             print("Not a valid move")
 
-#TODO: Allow Pawns to move 2 spaces on first move, check position pawn is moving from
 class Pawn(Piece):
     def __init__(self, pos, col):
         self.position = pos
@@ -195,6 +194,27 @@ class Knight(Piece):
         self.position = pos
         self.color = col
         self.name = "Knight"
+        
+    def getValidMoves(self):
+        pos = self.position.copy()
+        xPos = pos[0]
+        yPos = pos[1]
+        validMoves = []
+        possibleMoves = [[xPos + 2, yPos + 1],
+                        [xPos + 2, yPos - 1],
+                        [xPos - 2, yPos + 1],
+                        [xPos - 2, yPos - 1],
+                        [xPos + 1, yPos + 2],
+                        [xPos - 1, yPos + 2],
+                        [xPos + 1, yPos - 2],
+                        [xPos - 1, yPos - 2]]
+        for move in possibleMoves: 
+            square = board.getSquareAtPos(move)
+            if (self.isSquareValid(square)):
+                validMoves.append(square)
+        return validMoves
+
+            
 
 class Bishop(Piece):
     def __init__(self, pos, col):
@@ -263,21 +283,16 @@ def drawBoard(board):
 board = Board()
 board.populateSquares()
 drawBoard(board)
-testPawn = board.getPieceAtPos([3, 6])
-testPawn.move(board, board.getSquareAtPos([3,4]))
+testKnight= board.getPieceAtPos([1, 7])
+testKnight.move(board, board.getSquareAtPos([2,5]))
 drawBoard(board)
-testQueen = board.getPieceAtPos([3,7])
-testQueen.move(board, board.getSquareAtPos([3,5]))
+testKnight.move(board, board.getSquareAtPos([1,3]))
 drawBoard(board)
-testQueen.move(board, board.getSquareAtPos([7,1]))
+testKnight.move(board, board.getSquareAtPos([2,1]))
 drawBoard(board)
-testKing = board.getPieceAtPos([4, 7])
-testKing.move(board, board.getSquareAtPos([3,7]))
+testKnight.move(board, board.getSquareAtPos([4,2]))
 drawBoard(board)
-testKing.move(board, board.getSquareAtPos([3,6]))
-drawBoard(board)
-testKing.move(board, board.getSquareAtPos([2,5]))
-drawBoard(board)
+
 
 
 
