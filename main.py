@@ -10,11 +10,15 @@ class Board:
             for y in range(8):
                 number = x * 8 + y
                 pos = [x, y]
-
-                if (x == 0 and y == 1):
-                    occ = Rook(pos,"White")
-                elif (y == 6 or y == 7):
+                
+                if (y == 1):
+                    occ = Pawn(pos,"White")
+                elif (y == 6):
                     occ = Pawn(pos,"Black")
+                elif (y == 0):
+                    occ = self.populateKingRow(0,pos,"White")
+                elif (y == 7):
+                    occ = self.populateKingRow(7,pos,"Black")
                 else: 
                     occ = None                    
 
@@ -30,6 +34,22 @@ class Board:
                     else: color = "Black"
                 
                 self.squares[number] = (Square(pos, occ, color))
+
+    #Populates given row with classic pieces (non pawns)
+    def populateKingRow(self, row, pos, color):
+        if (pos[1] == row):
+            if (pos[0] == 0 or pos[0] == 7):
+                return Rook(pos, color)
+            elif (pos[0] == 1 or pos[0] == 6):
+                return Knight(pos, color)
+            elif (pos[0] == 2 or pos[0] == 5):
+                return Bishop(pos, color)
+            elif (pos[0] == 3):
+                return Queen(pos, color)
+            else:
+                return King(pos, color)
+
+
 
     def getSquareAtPos(self, pos):
         num = pos[0] * 8 + pos[1] 
@@ -182,6 +202,14 @@ class Bishop(Piece):
         self.color = col
         self.name = "Bishop"
 
+    def getValidMoves(self):
+        validMoves = []
+        validMoves.extend(super().isLineValid(board, 1, 1, 0))  #Right Forward Diag
+        validMoves.extend(super().isLineValid(board, -1, 1, 0)) #Left Forward Diag
+        validMoves.extend(super().isLineValid(board, 1, -1, 0)) #Right Back Diag
+        validMoves.extend(super().isLineValid(board, -1, -1, 0)) #Left Back Diag
+        return validMoves
+
 class Queen(Piece):
     def __init__(self, pos, col):
         self.position = pos
@@ -201,9 +229,9 @@ def drawBoard(board):
             invrow = 7-y
             square = board.getSquareAtPos([x, invrow])
             if (square.occupied == None):
-                print(square.color[0] + ' ', end = "")
+                print("|  " + square.color[0] + '  |', end = "")
             else:
-                print(square.occupied.name + ' ', end = "")
+                print("|" + square.occupied.name[0:4] + ' |', end = "")
     print("")
 
 
@@ -211,12 +239,12 @@ def drawBoard(board):
 board = Board()
 board.populateSquares()
 drawBoard(board)
-testRook = board.getPieceAtPos([0,1])
-testRook.move(board, board.getSquareAtPos([0,6]))
-drawBoard(board)
-testPawn = board.getPieceAtPos([1, 7])
-testPawn.move(board, board.getSquareAtPos([0,6]))
-drawBoard(board)
-testPawn2 = board.getPieceAtPos([1, 6])
-testPawn2.move(board, board.getSquareAtPos([1,4]))
-drawBoard(board)
+# testRook = board.getPieceAtPos([0,1])
+# testRook.move(board, board.getSquareAtPos([0,6]))
+# drawBoard(board)
+# testPawn = board.getPieceAtPos([1, 7])
+# testPawn.move(board, board.getSquareAtPos([0,6]))
+# drawBoard(board)
+# testPawn2 = board.getPieceAtPos([1, 6])
+# testPawn2.move(board, board.getSquareAtPos([1,4]))
+# drawBoard(board)
