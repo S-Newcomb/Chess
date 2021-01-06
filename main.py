@@ -216,6 +216,18 @@ class Queen(Piece):
         self.color = col
         self.name = "Queen"
 
+    def getValidMoves(self):
+        validMoves = []
+        validMoves.extend(super().isLineValid(board, 1, 0, 0))  #Right
+        validMoves.extend(super().isLineValid(board, -1, 0, 0)) #Left
+        validMoves.extend(super().isLineValid(board, 0, 1, 0))  #Up
+        validMoves.extend(super().isLineValid(board, 0, -1, 0)) #Down
+        validMoves.extend(super().isLineValid(board, 1, 1, 0))  #Right Forward Diag
+        validMoves.extend(super().isLineValid(board, -1, 1, 0)) #Left Forward Diag
+        validMoves.extend(super().isLineValid(board, 1, -1, 0)) #Right Back Diag
+        validMoves.extend(super().isLineValid(board, -1, -1, 0)) #Left Back Diag
+        return validMoves
+
 class King(Piece):
     def __init__(self, pos, col):
         self.position = pos
@@ -242,13 +254,14 @@ drawBoard(board)
 testPawn = board.getPieceAtPos([3, 6])
 testPawn.move(board, board.getSquareAtPos([3,4]))
 drawBoard(board)
-testBishop = board.getPieceAtPos([2,7])
-testBishop.move(board, board.getSquareAtPos([5,4]))
+testQueen = board.getPieceAtPos([3,7])
+testQueen.move(board, board.getSquareAtPos([3,5]))
 drawBoard(board)
-testBishop.move(board, board.getSquareAtPos([4,3]))
+testQueen.move(board, board.getSquareAtPos([7,1]))
 drawBoard(board)
-testBishop.move(board, board.getSquareAtPos([6,1]))
-drawBoard(board)
+
+
+
 # testRook = board.getPieceAtPos([0,1])
 # testRook.move(board, board.getSquareAtPos([0,6]))
 # drawBoard(board)
