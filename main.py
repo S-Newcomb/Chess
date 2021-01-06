@@ -1,9 +1,11 @@
 #Hopefully a fully working chess game built from scratch in python
+import random 
 
 class Board:
     #A class to represent the chess board
     squares = {}
 
+    #Creates all squares and adds them to the board
     def populateSquares(self):
        # print("here")
         for x in range(8):
@@ -122,10 +124,15 @@ class Piece:
 
     """Lots to do here:
         - Handle taken pieces """
-    def move(self, board, square):
+        #Moves the piece to designated square if possible
+        # returns True if move was valid, False if not
+    def move(self, board, square, playerColor):
         if (self == None):
             print("You can't move nothing!")
-            return
+            return False
+        if (self.color != playerColor):
+            print("Not your piece")
+            return False
         validMoves = self.getValidMoves(board)
         if square in validMoves:
             #Remove Piece from current square
@@ -134,8 +141,10 @@ class Piece:
             self.position = square.position
             #Mark that square is occupied by this piece
             square.occupied = self
+            return True
         else: 
             print("Not a valid move")
+            return False
 
 class Pawn(Piece):
     def __init__(self, pos, col):
@@ -197,9 +206,7 @@ class Knight(Piece):
             square = board.getSquareAtPos(move)
             if (self.isSquareValid(square)):
                 validMoves.append(square)
-        return validMoves
-
-            
+        return validMoves        
 
 class Bishop(Piece):
     def __init__(self, pos, col):
@@ -263,6 +270,15 @@ def drawBoard(board):
                 print("|" + square.occupied.name[0:4] + ' |', end = "")
     print("")
 
+class Player:
+    color = str
+    pieces = []
+    capturedPieces = []
+
+    def __init__(self, color):
+        self.color = color
+
+#Converts traditional chess positions (i.e A8) to positions
 def alphaNumMoveToPos(text):
     letter = text[0].capitalize()
     number = text[1]
@@ -293,21 +309,38 @@ def alphaNumMoveToPos(text):
         return
     return [letter, number]
 
-def parseMove(text, board):
+#Parses the text into a move and moves the pieces
+#Returns whether the move was valid
+def parseMove(text, board, playerColor):
     trimText = text.strip()
     piecePos = alphaNumMoveToPos(trimText[0:2])
     targetSquare = alphaNumMoveToPos(trimText[3:])
-    board.getPieceAtPos(piecePos).move(board, board.getSquareAtPos(targetSquare))
-
+    piece = board.getPieceAtPos(piecePos)
+    square = board.getSquareAtPos(targetSquare)
+    validMove = piece.move(board, square, playerColor)
+    return validMove
 
 def startGame():
     board = Board()
     board.populateSquares()
+
+    colors = ["White", "Black"]
+    playerColor = random.randint(0, 1)
+    player1 = Player(colors[playerColor])
+    player2 = Player(colors[1-playerColor])
     drawBoard(board)
+
     gameOver = False
+    whiteTurn = True
     while not gameOver:
-        move = input("Type your move:")
-        parseMove(move, board)
+        if (whiteTurn):
+            move = input("White's move:")
+            validMove = parseMove(move, board, "White")
+        else:
+            move = input("Black's move:")
+            validMove = parseMove(move, board, "Black")
+        if (validMove):
+            whiteTurn = not whiteTurn
         drawBoard(board)
 
 startGame()
