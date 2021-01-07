@@ -5,6 +5,9 @@ class Board:
     #A class to represent the chess board
     squares = {}
 
+    #Probably a better way for board to have access to players
+    players = []
+
     #Creates all squares and adds them to the board
     def populateSquares(self):
        # print("here")
@@ -116,27 +119,37 @@ class Piece:
         newPos[1] += changeInY
         count = 0
         while self.isSquareValid(board.getSquareAtPos(newPos)) and count < range:
-            validSquares.append(board.getSquareAtPos(newPos))
-            newPos[0] += changeInX
-            newPos[1] += changeInY
-            count += 1
+            square = board.getSquareAtPos(newPos)
+
+            #if current square has an enemy on it break 
+            if (square.occupied != None):
+                validSquares.append(square)
+                return validSquares
+            else:
+                validSquares.append(square)
+                newPos[0] += changeInX
+                newPos[1] += changeInY
+                count += 1
         return validSquares
 
     """Lots to do here:
         - Handle taken pieces """
         #Moves the piece to designated square if possible
         # returns True if move was valid, False if not
-    def move(self, board, square, playerColor):
+    def move(self, board, square, player):
         if (self == None):
             print("You can't move nothing!")
             return False
-        if (self.color != playerColor):
+        if (self.color != player.color):
             print("Not your piece")
             return False
         validMoves = self.getValidMoves(board)
         if square in validMoves:
             #Remove Piece from current square
             board.getSquareAtPos(self.position).occupied = None
+            #If square has an enemy piece on it, capture it
+            if (square.occupied != None):
+                player.capturedPieces.append(square.occupied)
             #Move Piece to new square
             self.position = square.position
             #Mark that square is occupied by this piece
@@ -265,8 +278,17 @@ class Player:
 
     def __init__(self, color):
         self.color = color
+        self.pieces = []
+        self.capturedPieces = []
 
 def drawBoard(board):
+    print(" ")
+    print(" ")
+    print("Black Captured: ", end = "")
+    for captured in board.players[1].capturedPieces:
+        print(captured.name[:4], end = " ")
+    print(" ")
+    print(" ")
     for y in range(9):
         #print guide numbers before each row
         if (y < 8):
@@ -286,7 +308,13 @@ def drawBoard(board):
                     print("|" + square.occupied.name[0:4] + ' |', end = "")
                 if (x == 7):
                     print(" ")
-    print("")
+    print(" ")
+    print(" ")
+    print("White captured: ", end = "")
+    for captured in board.players[0].capturedPieces:
+        print(captured.name[:4], end = " ")
+    print(" ")
+    print(" ")
 
 #Converts number of row to a letter
 def numToLetter(num):
@@ -342,31 +370,49 @@ def alphaNumMoveToPos(text):
     #convert letters to x 
     letter = letterToNum(letter)
     #convert numbers from 1-8 to 0-7
-    number = int(number) - 1
-    if (number > 7 or number < 0):
+    if (number.isnumeric()):
+        number = int(number) - 1
+        if (number > 7 or number < 0):
+            print("Number: " + number + " is not valid")
+            return
+    else: 
         print("Number: " + number + " is not valid")
         return
     return [letter, number]
 
 #Parses the text into a move and moves the pieces
 #Returns whether the move was valid
-def parseMove(text, board, playerColor):
+def parseMove(text, board, player):
     trimText = text.strip()
     piecePos = alphaNumMoveToPos(trimText[0:2])
     targetSquare = alphaNumMoveToPos(trimText[3:])
+    if (piecePos == None or targetSquare == None):
+        return False
     piece = board.getPieceAtPos(piecePos)
     square = board.getSquareAtPos(targetSquare)
-    validMove = piece.move(board, square, playerColor)
+    validMove = piece.move(board, square, player)
     return validMove
 
 def startGame():
+    #Create the board
     board = Board()
     board.populateSquares()
 
+    #Create Players and assign them random color
     colors = ["White", "Black"]
     playerColor = random.randint(0, 1)
     player1 = Player(colors[playerColor])
     player2 = Player(colors[1-playerColor])
+
+    #Probably a cleaner way to pass players into move function, Fine for now
+    if (player1.color == "White"):
+        whitePlayer = player1
+        blackPlayer = player2 
+    else:
+        whitePlayer = player2
+        blackPlayer = player1 
+
+    board.players = [whitePlayer, blackPlayer]
     drawBoard(board)
 
     gameOver = False
@@ -374,10 +420,16 @@ def startGame():
     while not gameOver:
         if (whiteTurn):
             move = input("White's move:")
-            validMove = parseMove(move, board, "White")
+            if (move == "end"):
+                gameOver = True
+                return
+            validMove = parseMove(move, board, whitePlayer)
         else:
             move = input("Black's move:")
-            validMove = parseMove(move, board, "Black")
+            if (move == "end"):
+                gameOver = True
+                return
+            validMove = parseMove(move, board, blackPlayer)
         if (validMove):
             whiteTurn = not whiteTurn
         drawBoard(board)
