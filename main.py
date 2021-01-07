@@ -258,18 +258,6 @@ class King(Piece):
         validMoves.extend(super().isLineValid(board, -1, -1, 1)) #Left Back Diag
         return validMoves
 
-def drawBoard(board):
-    for y in range(8):
-        print("")
-        for x in range(8):
-            invrow = 7-y
-            square = board.getSquareAtPos([x, invrow])
-            if (square.occupied == None):
-                print("|  " + square.color[0] + '  |', end = "")
-            else:
-                print("|" + square.occupied.name[0:4] + ' |', end = "")
-    print("")
-
 class Player:
     color = str
     pieces = []
@@ -278,11 +266,53 @@ class Player:
     def __init__(self, color):
         self.color = color
 
-#Converts traditional chess positions (i.e A8) to positions
-def alphaNumMoveToPos(text):
-    letter = text[0].capitalize()
-    number = text[1]
-    #convert letters to x 
+def drawBoard(board):
+    for y in range(9):
+        #print guide numbers before each row
+        if (y < 8):
+            print(8-y, end = " ")
+        else:
+            print(" ", end = " ")
+        for x in range(8):
+            #If on the last row print guide letters
+            if (y==8): 
+                print ("   " +numToLetter(x) + "   ", end = "")
+            else:
+                invrow = 7-y
+                square = board.getSquareAtPos([x, invrow])
+                if (square.occupied == None):
+                    print("|  " + square.color[0] + '  |', end = "")
+                else:
+                    print("|" + square.occupied.name[0:4] + ' |', end = "")
+                if (x == 7):
+                    print(" ")
+    print("")
+
+#Converts number of row to a letter
+def numToLetter(num):
+    if (num == 0):
+        num  = "A"
+    elif (num == 1):
+        num = "B"
+    elif (num == 2):
+        num = "C"
+    elif (num == 3):
+        num = "D"
+    elif (num == 4):
+        num = "E"
+    elif (num == 5):
+        num = "F"
+    elif (num == 6):
+        num = "G"
+    elif (num == 7):
+        num = "H"
+    else:
+        print("Number: " + num + " is not valid")
+        return
+    return num
+
+#Converts letter of a row to a number
+def letterToNum(letter):
     if (letter == "A"):
         letter = 0
     elif (letter == "B"):
@@ -302,6 +332,15 @@ def alphaNumMoveToPos(text):
     else:
         print("Letter: " + letter + " is not valid")
         return
+    return letter
+
+
+#Converts traditional chess positions (i.e A8) to positions
+def alphaNumMoveToPos(text):
+    letter = text[0].capitalize()
+    number = text[1]
+    #convert letters to x 
+    letter = letterToNum(letter)
     #convert numbers from 1-8 to 0-7
     number = int(number) - 1
     if (number > 7 or number < 0):
