@@ -16,14 +16,18 @@ class Board:
                 number = x * 8 + y
                 pos = [x, y]
                 
-                if (y == 1):
-                    occ = Pawn(pos,"White")
-                elif (y == 6):
-                    occ = Pawn(pos,"Black")
-                elif (y == 0):
+                # if (y == 1):
+                #     occ = Pawn(pos,"White")
+                #     self.players[0].pieces.append(occ)
+                # elif (y == 6):
+                #     occ = Pawn(pos,"Black")
+                #     self.players[1].pieces.append(occ)
+                if (y == 0):
                     occ = self.populateKingRow(0,pos,"White")
+                    self.players[0].pieces.append(occ)
                 elif (y == 7):
                     occ = self.populateKingRow(7,pos,"Black")
+                    self.players[1].pieces.append(occ)
                 else: 
                     occ = None                    
 
@@ -54,8 +58,6 @@ class Board:
             else:
                 return King(pos, color)
 
-
-
     def getSquareAtPos(self, pos):
         num = pos[0] * 8 + pos[1] 
 
@@ -67,6 +69,11 @@ class Board:
     def getPieceAtPos(self, pos):
         square = self.getSquareAtPos(pos)
         return square.occupied
+
+    def getPlayer(self, color):
+        if color == "White":
+            return self.players[0]
+        return self.players[1]
 
 class Square:
         number = int
@@ -84,16 +91,68 @@ class Piece:
     position = [int, int]
     color = str
 
-    def inCheck(self):
-        pass
+    #Returns whether moving to this square will put yourself in check
+    def selfCheck(self, board, square):
+        player = board.getPlayer(self.color)
+        opponent = player.getOpponent(board)
+        #If this piece is players King
+        if self.name == "King":
+            pass
+        else:
+            #Get the players King
+            king = None
+            for piece in player.pieces:
+                if piece.name == "King":
+                    king = piece
+                    break
 
-    """Checks that the square reached by pos is a valid square for this piece"""
-    def isSquareValid(self, square):
+            posDif = [self.position[0] - king.position[0], 
+                      self.position[1] - king.position[1]]
+
+            #in the same column as King
+            if self.position[0] == king.position[0]:
+                if square.position[0] == self.position[0]: #if square is in same column, king is still safe
+                    return False
+                if posDif[1] > 0:   #if piece is above King
+                    increment = 1
+                else:               #piece is below King
+                    increment = -1
+                newPos = self.position.copy()
+                newPos[1] += increment
+                newSquare = board.getSquareAtPos(newPos)
+                while newSquare != None:    #while on a square in bounds 
+                    piece = newSquare.occupied
+                    if piece != None:  #if it has a piece on it
+                        if piece.color == player.color: #if another of players pieces is blocking King
+                            return False
+                        else: 
+                            if (piece.name == "Rook" or piece.name == "Queen"): #if it is an enemy Rook or Queen
+                                return True
+                    newPos[1] += increment
+                    newSquare = board.getSquareAtPos(newPos)
+                return False
+
+
+
+
+
+            #in the same row as King
+            if piece.position[1] == king.position[1]:
+                pass
+
+            #diagonal to King
+            if abs(posDif[0]) == abs(posDif[1]):
+                pass
+        
+
+
+    #Checks that the square reached by pos is a valid square for this piece"""
+    def isSquareValid(self, board, square):
         if square == None:
             return False
 
-        """if inCheck(self):
-            return False"""
+        if self.selfCheck(board, square):
+            return False
 
         #Is that square occupied by another of your pieces?
         piece = square.occupied
@@ -103,6 +162,7 @@ class Piece:
         #Pawns cannot attack up
         if (piece != None and self.name == "Pawn" and piece.position[0] == self.position[0]):
             return False
+
         #Pawns cannot move diagonally unless capturing
         if (piece == None and self.name == "Pawn" and 
         (square.position[0] == self.position[0] + 1 or square.position[0] == self.position[0] - 1)):
@@ -118,7 +178,7 @@ class Piece:
         newPos[0] += changeInX
         newPos[1] += changeInY
         count = 0
-        while self.isSquareValid(board.getSquareAtPos(newPos)) and count < range:
+        while self.isSquareValid(board, board.getSquareAtPos(newPos)) and count < range:
             square = board.getSquareAtPos(newPos)
 
             #if current square has an enemy on it break 
@@ -132,10 +192,9 @@ class Piece:
                 count += 1
         return validSquares
 
-    """Lots to do here:
-        - Handle taken pieces """
-        #Moves the piece to designated square if possible
-        # returns True if move was valid, False if not
+
+    #Moves the piece to designated square if possible
+    # returns True if move was valid, False if not
     def move(self, board, square, player):
         if (self == None):
             print("You can't move nothing!")
@@ -217,7 +276,7 @@ class Knight(Piece):
                         [xPos - 1, yPos - 2]]
         for move in possibleMoves: 
             square = board.getSquareAtPos(move)
-            if (self.isSquareValid(square)):
+            if (self.isSquareValid(board, square)):
                 validMoves.append(square)
         return validMoves        
 
@@ -280,6 +339,11 @@ class Player:
         self.color = color
         self.pieces = []
         self.capturedPieces = []
+    
+    def getOpponent(self, board):
+        opponent = (board.players[1] if board.players[0] == self else board.players[0])
+        return opponent
+
 
 def drawBoard(board):
     print(" ")
@@ -396,7 +460,6 @@ def parseMove(text, board, player):
 def startGame():
     #Create the board
     board = Board()
-    board.populateSquares()
 
     #Create Players and assign them random color
     colors = ["White", "Black"]
@@ -413,6 +476,7 @@ def startGame():
         blackPlayer = player1 
 
     board.players = [whitePlayer, blackPlayer]
+    board.populateSquares()
     drawBoard(board)
 
     gameOver = False
