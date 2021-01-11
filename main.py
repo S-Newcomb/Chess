@@ -91,6 +91,16 @@ class Piece:
     position = [int, int]
     color = str
 
+    #Returns whether int1 and int 2 or both positive or negative
+    def samePolarity(self, int1, int2):
+        if int1 > 0:
+            if int2 > 0:
+                return True
+        if int1 < 0:
+            if int2 < 0:
+                return True
+        return False
+
     #Returns whether moving to this square will put yourself in check
     def selfCheck(self, board, square):
         player = board.getPlayer(self.color)
@@ -132,17 +142,60 @@ class Piece:
                     newSquare = board.getSquareAtPos(newPos)
                 return False
 
-
-
-
-
             #in the same row as King
-            if piece.position[1] == king.position[1]:
-                pass
-
+            if self.position[1] == king.position[1]:
+                if square.position[1] == self.position[1]: #if move is in same row, king is still safe
+                    return False
+                if posDif[0] > 0:   #if piece is right of King
+                    increment = 1
+                else:               #piece is left of King
+                    increment = -1
+                newPos = self.position.copy()
+                newPos[0] += increment
+                newSquare = board.getSquareAtPos(newPos)
+                while newSquare != None:    #while on a square in bounds 
+                    piece = newSquare.occupied
+                    if piece != None:  #if it has a piece on it
+                        if piece.color == player.color: #if another of players pieces is blocking King
+                            return False
+                        else: 
+                            if (piece.name == "Rook" or piece.name == "Queen"): #if it is an enemy Rook or Queen
+                                return True
+                    newPos[0] += increment
+                    newSquare = board.getSquareAtPos(newPos)
+                return False
+                
             #diagonal to King
             if abs(posDif[0]) == abs(posDif[1]):
-                pass
+                squareDif = [square.position[0] - king.position[0], 
+                square.position[1] - king.position[1]]
+                #If square in the same diagonal
+                if self.samePolarity(posDif[0], squareDif[0]) and samePolarity(posDif[1], squareDif[1]):
+                    return False                
+                if posDif[0] > 0:   #if piece is right of King
+                  incrementX = 1
+                else:               #piece is left of King
+                    incrementX = -1
+                if posDif[1] > 0:   #if piece is above King
+                    incrementY = 1
+                else:               #piece is below King
+                    incrementY = -1
+                newPos = self.position.copy()
+                newPos[0] += incrementX
+                newPos[1] += incrementY
+                newSquare = board.getSquareAtPos(newPos)
+                while newSquare != None:    #while on a square in bounds 
+                    piece = newSquare.occupied
+                    if piece != None:  #if it has a piece on it
+                        if piece.color == player.color: #if another of players pieces is blocking King
+                            return False
+                        else: 
+                            if (piece.name == "Bishop" or piece.name == "Queen"): #if it is an enemy Rook or Queen
+                                return True
+                    newPos[0] += incrementX
+                    newPos[1] += incrementY
+                    newSquare = board.getSquareAtPos(newPos)
+                return False
         
 
 
@@ -152,6 +205,7 @@ class Piece:
             return False
 
         if self.selfCheck(board, square):
+            print("Cannot put yourself in check")
             return False
 
         #Is that square occupied by another of your pieces?
@@ -196,9 +250,6 @@ class Piece:
     #Moves the piece to designated square if possible
     # returns True if move was valid, False if not
     def move(self, board, square, player):
-        if (self == None):
-            print("You can't move nothing!")
-            return False
         if (self.color != player.color):
             print("Not your piece")
             return False
@@ -447,15 +498,24 @@ def alphaNumMoveToPos(text):
 #Parses the text into a move and moves the pieces
 #Returns whether the move was valid
 def parseMove(text, board, player):
-    trimText = text.strip()
-    piecePos = alphaNumMoveToPos(trimText[0:2])
-    targetSquare = alphaNumMoveToPos(trimText[3:])
+    try:
+        trimText = text.strip()
+        piecePos = alphaNumMoveToPos(trimText[0:2])
+        targetSquare = alphaNumMoveToPos(trimText[3:])
+    except:
+        print("Move not Valid")
+        return False
+
     if (piecePos == None or targetSquare == None):
         return False
     piece = board.getPieceAtPos(piecePos)
+    if piece == None:
+        return False
     square = board.getSquareAtPos(targetSquare)
     validMove = piece.move(board, square, player)
     return validMove
+
+        
 
 def startGame():
     #Create the board
