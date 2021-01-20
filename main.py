@@ -170,7 +170,7 @@ class Piece:
                 squareDif = [square.position[0] - king.position[0], 
                 square.position[1] - king.position[1]]
                 #If square in the same diagonal
-                if self.samePolarity(posDif[0], squareDif[0]) and samePolarity(posDif[1], squareDif[1]):
+                if self.samePolarity(posDif[0], squareDif[0]) and self.samePolarity(posDif[1], squareDif[1]):
                     return False                
                 if posDif[0] > 0:   #if piece is right of King
                   incrementX = 1
