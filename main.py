@@ -1,6 +1,20 @@
 #Hopefully a fully working chess game built from scratch in python
 import random 
 
+#Returns whether int1 and int2 are both positive or negative
+def samePolarity(int1, int2):
+    if int1 > 0:
+        if int2 > 0:
+            return True
+    if int1 < 0:
+        if int2 < 0:
+            return True
+    return False
+
+#Returns whether each matching element in pos1 and pos2 are both positive or negative
+def samePolarityPos(pos1, pos2):
+    return samePolarity(pos1[0], pos2[0]) and samePolarity(pos1[1], pos2[1])
+
 class Board:
     #A class to represent the chess board
     squares = {}
@@ -91,16 +105,6 @@ class Piece:
     position = [int, int]
     color = str
 
-    #Returns whether int1 and int 2 or both positive or negative
-    def samePolarity(self, int1, int2):
-        if int1 > 0:
-            if int2 > 0:
-                return True
-        if int1 < 0:
-            if int2 < 0:
-                return True
-        return False
-
     #Returns if moving to square will put you in check in dir incX incY
     def selfCheckLine(self, board, pos, incX, incY):
         newPos = pos.copy()  
@@ -130,22 +134,50 @@ class Piece:
     def kingSelfCheck(self, board, square):
         kingPos = self.position
         newPos = square.position.copy()
-        newSquare = board.getSquareAtPos(newPos)
-        #check up column
-        while newSquare != None:
-            piece = newSquare.occupied
-            if piece != None:  #if it has a piece on it
-                if piece.color == self.color: #if another of players pieces is blocking King
-                    break
-                else: 
-                    if (piece.name == "Rook" or piece.name == "Queen"): #if it is an enemy Rook or Queen
-                        return True
-            newPos[1] += 1
-            newSquare = board.getSquareAtPos(newPos)
-        
-        
-        
-
+        #check columns
+        if self.selfCheckLine(board, newPos, 0, 1):
+            return True
+        if self.selfCheckLine(board, newPos, 0, -1):
+            return True
+        #check rows
+        if self.selfCheckLine(board, newPos, 1, 0):
+            return True
+        if self.selfCheckLine(board, newPos, -1, 0):
+            return True
+        #check diagonals
+        if self.selfCheckLine(board, newPos, 1, 1):
+            return True
+        if self.selfCheckLine(board, newPos, -1, -1):
+            return True
+        if self.selfCheckLine(board, newPos, -1, 1):
+            return True
+        if self.selfCheckLine(board, newPos, 1, -1):
+            return True
+        #check knights
+        xPos = newPos[0]
+        yPos = newPos[1]
+        possibleKnights = [[xPos + 2, yPos + 1],
+                        [xPos + 2, yPos - 1],
+                        [xPos - 2, yPos + 1],
+                        [xPos - 2, yPos - 1],
+                        [xPos + 1, yPos + 2],
+                        [xPos - 1, yPos + 2],
+                        [xPos + 1, yPos - 2],
+                        [xPos - 1, yPos - 2]]
+        for k in possibleKnights:
+            if board.getSquareAtPos(k) != None:
+                if board.getSquareAtPos(k).occupied == "Knight":
+                    return True
+        #check pawns
+        if self.color == "White": #Pawns can only attack in 1 direction so only check 
+            pawnY = 1             # the spots they can hit the square from
+        else:
+            pawnY = -1
+        if board.getSquareAtPos([xPos+1, pawnY]).occupied == "Pawn":
+            return True
+        if board.getSquareAtPos([xPos-1, pawnY]).occupied == "Pawn":
+            return True
+        return False
 
     #Returns whether moving to this square will put yourself in check
     def selfCheck(self, board, square):
@@ -153,7 +185,7 @@ class Piece:
         opponent = player.getOpponent(board)
         #If this piece is players King
         if self.name == "King":
-            pass
+            return self.kingSelfCheck(board, square)
         else:
             #Get the players King
             king = None
@@ -192,7 +224,7 @@ class Piece:
                 squareDif = [square.position[0] - king.position[0], 
                 square.position[1] - king.position[1]]
                 #If square in the same diagonal
-                if abs(squareDif[0]) == abs(squareDif[1]):
+                if abs(squareDif[0]) == abs(squareDif[1]) and samePolarityPos(posDif, squareDif):
                     return False                
                 if posDif[0] > 0:   #if piece is right of King
                   incrementX = 1
