@@ -101,6 +101,52 @@ class Piece:
                 return True
         return False
 
+    #Returns if moving to square will put you in check in dir incX incY
+    def selfCheckLine(self, board, pos, incX, incY):
+        newPos = pos.copy()  
+        newSquare = board.getSquareAtPos(newPos)
+        while newSquare != None:
+            piece = newSquare.occupied
+            if piece != None:  #if it has a piece on it
+                if newPos == self.position: #if this is this piece's pos skip
+                    pass
+                elif piece.color == self.color: #if another of players pieces is blocking King
+                    return False
+                else: 
+                    if piece.name == "Queen": #if it is an enemy Queen
+                        return True
+                    if incX == 0 or incY == 0: #if this is a column or row
+                        if piece.name == "Rook":
+                            return True
+                    else:                      #if this is a diagonal
+                        if piece.name == "Bishop":
+                            return True                       
+            newPos[0] += incX
+            newPos[1] += incY
+            newSquare = board.getSquareAtPos(newPos)
+        return False
+
+    #Returns whether moving King to this square will put yourself in check
+    def kingSelfCheck(self, board, square):
+        kingPos = self.position
+        newPos = square.position.copy()
+        newSquare = board.getSquareAtPos(newPos)
+        #check up column
+        while newSquare != None:
+            piece = newSquare.occupied
+            if piece != None:  #if it has a piece on it
+                if piece.color == self.color: #if another of players pieces is blocking King
+                    break
+                else: 
+                    if (piece.name == "Rook" or piece.name == "Queen"): #if it is an enemy Rook or Queen
+                        return True
+            newPos[1] += 1
+            newSquare = board.getSquareAtPos(newPos)
+        
+        
+        
+
+
     #Returns whether moving to this square will put yourself in check
     def selfCheck(self, board, square):
         player = board.getPlayer(self.color)
@@ -128,19 +174,7 @@ class Piece:
                 else:               #piece is below King
                     increment = -1
                 newPos = self.position.copy()
-                newPos[1] += increment
-                newSquare = board.getSquareAtPos(newPos)
-                while newSquare != None:    #while on a square in bounds 
-                    piece = newSquare.occupied
-                    if piece != None:  #if it has a piece on it
-                        if piece.color == player.color: #if another of players pieces is blocking King
-                            return False
-                        else: 
-                            if (piece.name == "Rook" or piece.name == "Queen"): #if it is an enemy Rook or Queen
-                                return True
-                    newPos[1] += increment
-                    newSquare = board.getSquareAtPos(newPos)
-                return False
+                return self.selfCheckLine(board, newPos, 0, increment)
 
             #in the same row as King
             if self.position[1] == king.position[1]:
@@ -151,26 +185,14 @@ class Piece:
                 else:               #piece is left of King
                     increment = -1
                 newPos = self.position.copy()
-                newPos[0] += increment
-                newSquare = board.getSquareAtPos(newPos)
-                while newSquare != None:    #while on a square in bounds 
-                    piece = newSquare.occupied
-                    if piece != None:  #if it has a piece on it
-                        if piece.color == player.color: #if another of players pieces is blocking King
-                            return False
-                        else: 
-                            if (piece.name == "Rook" or piece.name == "Queen"): #if it is an enemy Rook or Queen
-                                return True
-                    newPos[0] += increment
-                    newSquare = board.getSquareAtPos(newPos)
-                return False
+                return self.selfCheckLine(board, newPos, increment, 0)
                 
             #diagonal to King
             if abs(posDif[0]) == abs(posDif[1]):
                 squareDif = [square.position[0] - king.position[0], 
                 square.position[1] - king.position[1]]
                 #If square in the same diagonal
-                if self.samePolarity(posDif[0], squareDif[0]) and self.samePolarity(posDif[1], squareDif[1]):
+                if abs(squareDif[0]) == abs(squareDif[1]):
                     return False                
                 if posDif[0] > 0:   #if piece is right of King
                   incrementX = 1
@@ -181,21 +203,8 @@ class Piece:
                 else:               #piece is below King
                     incrementY = -1
                 newPos = self.position.copy()
-                newPos[0] += incrementX
-                newPos[1] += incrementY
-                newSquare = board.getSquareAtPos(newPos)
-                while newSquare != None:    #while on a square in bounds 
-                    piece = newSquare.occupied
-                    if piece != None:  #if it has a piece on it
-                        if piece.color == player.color: #if another of players pieces is blocking King
-                            return False
-                        else: 
-                            if (piece.name == "Bishop" or piece.name == "Queen"): #if it is an enemy Rook or Queen
-                                return True
-                    newPos[0] += incrementX
-                    newPos[1] += incrementY
-                    newSquare = board.getSquareAtPos(newPos)
-                return False
+                return self.selfCheckLine(board, newPos, incrementX, incrementY)
+            return False
         
 
 
